@@ -178,8 +178,19 @@ pub fn create_codec(codec: CodecType, _options: &CodecOptions) -> Result<Option<
             ))
         }
         CodecType::ZSTD(level) => {
-            #[cfg(any(feature = "zstd", test))]
+            #[cfg(all(
+                any(feature = "zstd", test),
+                not(all(target_arch = "wasm32", target_os = "unknown"))
+            ))]
             return Ok(Some(Box::new(ZSTDCodec::new(level))));
+            #[cfg(all(
+                feature = "zstd",
+                target_arch = "wasm32",
+                target_os = "unknown"
+            ))]
+            return Err(ParquetError::General(
+                "cannot create Parquet zstd codec: feature \"zstd\" is enabled, but no backend is available for target wasm32-unknown-unknown".into(),
+            ));
             Err(ParquetError::General(
                 "Disabled feature at compile time: zstd".into(),
             ))
@@ -501,7 +512,10 @@ mod lz4_codec {
 #[cfg(all(feature = "experimental", any(feature = "lz4", test)))]
 pub use lz4_codec::*;
 
-#[cfg(any(feature = "zstd", test))]
+#[cfg(all(
+    any(feature = "zstd", test),
+    not(all(target_arch = "wasm32", target_os = "unknown"))
+))]
 mod zstd_codec {
     use crate::compression::{Codec, ZstdLevel};
     use crate::errors::Result;
@@ -567,7 +581,10 @@ mod zstd_codec {
         }
     }
 }
-#[cfg(any(feature = "zstd", test))]
+#[cfg(all(
+    any(feature = "zstd", test),
+    not(all(target_arch = "wasm32", target_os = "unknown"))
+))]
 pub use zstd_codec::*;
 
 /// Represents a valid zstd compression level.
