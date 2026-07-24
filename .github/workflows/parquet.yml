@@ -142,12 +142,18 @@ jobs:
         run: |
             rustup target add wasm32-unknown-unknown
             rustup target add wasm32-wasip1
-      - name: Install clang # Needed for zlib compilation
-        run: apt-get update && apt-get install -y clang gcc-multilib
-      - name: Build wasm32-unknown-unknown
-        run: cargo build -p parquet --target wasm32-unknown-unknown
+      - name: Generate the ignored workspace lock
+        run: cargo generate-lockfile
+      - name: Build feature-unified wasm32-unknown-unknown
+        run: |
+          cargo check -p parquet \
+            --target wasm32-unknown-unknown \
+            --no-default-features \
+            --features arrow,async,object_store,snap,brotli,flate2-zlib-rs,lz4,zstd,base64,simdutf8 \
+            --locked
+          bash dev/check_wasm_dependency_policy.sh parquet
       - name: Build wasm32-wasip1
-        run: cargo build -p parquet --target wasm32-wasip1
+        run: cargo build -p parquet --target wasm32-wasip1 --locked
 
   pyspark-integration-test:
     name: PySpark Integration Test
