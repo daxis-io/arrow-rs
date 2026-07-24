@@ -35,6 +35,9 @@ bench = false
 [package.metadata.docs.rs]
 all-features = true
 
+[target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
+zstd = { version = "0.13.0", default-features = false, optional = true }
+
 [dependencies]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
@@ -43,7 +46,6 @@ arrow-schema = { workspace = true }
 arrow-select = { workspace = true}
 flatbuffers = { version = "25.2.10", default-features = false }
 lz4_flex = { version = "0.13", default-features = false, features = ["std", "frame"], optional = true }
-zstd = { version = "0.13.0", default-features = false, optional = true }
 
 [features]
 default = []

@@ -55,9 +55,15 @@
 //!
 //! [`object_store`] provides it's native implementation of [`AsyncFileWriter`] by [`ParquetObjectWriter`].
 
-#[cfg(feature = "object_store")]
+#[cfg(all(
+    feature = "object_store",
+    not(all(target_arch = "wasm32", target_os = "unknown"))
+))]
 mod store;
-#[cfg(feature = "object_store")]
+#[cfg(all(
+    feature = "object_store",
+    not(all(target_arch = "wasm32", target_os = "unknown"))
+))]
 pub use store::*;
 
 use crate::{
