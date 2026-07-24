@@ -190,10 +190,19 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown
           rustup target add wasm32-wasip1
+      - name: Generate the ignored workspace lock
+        run: cargo generate-lockfile
       - name: Build wasm32-unknown-unknown
-        run: cargo build -p arrow --no-default-features --features=json,csv,ipc,ffi --target wasm32-unknown-unknown
+        run: |
+          cargo build -p arrow --no-default-features --features=json,csv,ipc,ffi --target wasm32-unknown-unknown --locked
+          cargo check -p arrow-ipc \
+            --target wasm32-unknown-unknown \
+            --no-default-features \
+            --features lz4,zstd \
+            --locked
+          bash dev/check_wasm_dependency_policy.sh arrow-ipc
       - name: Build wasm32-wasip1
-        run: cargo build -p arrow --no-default-features --features=json,csv,ipc,ffi --target wasm32-wasip1
+        run: cargo build -p arrow --no-default-features --features=json,csv,ipc,ffi --target wasm32-wasip1 --locked
 
   clippy:
     name: Clippy
