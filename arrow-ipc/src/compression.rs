@@ -29,12 +29,18 @@ const LENGTH_OF_PREFIX_DATA: i64 = 8;
 /// compression.
 #[derive(Default)]
 pub struct CompressionContext {
-    #[cfg(feature = "zstd")]
+    #[cfg(all(
+        feature = "zstd",
+        not(all(target_arch = "wasm32", target_os = "unknown"))
+    ))]
     compressor: Option<zstd::bulk::Compressor<'static>>,
 }
 
 impl CompressionContext {
-    #[cfg(feature = "zstd")]
+    #[cfg(all(
+        feature = "zstd",
+        not(all(target_arch = "wasm32", target_os = "unknown"))
+    ))]
     fn zstd_compressor(&mut self) -> &mut zstd::bulk::Compressor<'static> {
         self.compressor.get_or_insert_with(|| {
             zstd::bulk::Compressor::new(zstd::DEFAULT_COMPRESSION_LEVEL)
@@ -47,7 +53,10 @@ impl std::fmt::Debug for CompressionContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut ds = f.debug_struct("CompressionContext");
 
-        #[cfg(feature = "zstd")]
+        #[cfg(all(
+            feature = "zstd",
+            not(all(target_arch = "wasm32", target_os = "unknown"))
+        ))]
         ds.field(
             "compressor",
             &self.compressor.as_ref().map(|_| "zstd::bulk::Compressor"),
@@ -63,7 +72,10 @@ impl std::fmt::Debug for CompressionContext {
 /// between subsequent decompression calls to avoid the performance overhead of initialising a new
 /// context for every decompression.
 pub struct DecompressionContext {
-    #[cfg(feature = "zstd")]
+    #[cfg(all(
+        feature = "zstd",
+        not(all(target_arch = "wasm32", target_os = "unknown"))
+    ))]
     decompressor: Option<zstd::bulk::Decompressor<'static>>,
 }
 
@@ -72,7 +84,10 @@ impl DecompressionContext {
         Default::default()
     }
 
-    #[cfg(feature = "zstd")]
+    #[cfg(all(
+        feature = "zstd",
+        not(all(target_arch = "wasm32", target_os = "unknown"))
+    ))]
     fn zstd_decompressor(&mut self) -> &mut zstd::bulk::Decompressor<'static> {
         self.decompressor.get_or_insert_with(|| {
             zstd::bulk::Decompressor::new().expect("can create zstd decompressor")
@@ -84,7 +99,10 @@ impl DecompressionContext {
 impl Default for DecompressionContext {
     fn default() -> Self {
         DecompressionContext {
-            #[cfg(feature = "zstd")]
+            #[cfg(all(
+                feature = "zstd",
+                not(all(target_arch = "wasm32", target_os = "unknown"))
+            ))]
             decompressor: None,
         }
     }
@@ -94,7 +112,10 @@ impl std::fmt::Debug for DecompressionContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut ds = f.debug_struct("DecompressionContext");
 
-        #[cfg(feature = "zstd")]
+        #[cfg(all(
+            feature = "zstd",
+            not(all(target_arch = "wasm32", target_os = "unknown"))
+        ))]
         ds.field(
             "decompressor",
             &self
@@ -153,7 +174,10 @@ impl CompressionCodec {
         } else {
             // write compressed data directly into the output buffer
             output.extend_from_slice(&uncompressed_data_len.to_le_bytes());
-            self.compress(input, output, context)?;
+            if let Err(error) = self.compress(input, output, context) {
+                output.truncate(original_output_len);
+                return Err(error);
+            }
 
             let compression_len = output.len() - original_output_len;
             if compression_len > uncompressed_data_len {
@@ -274,7 +298,10 @@ fn decompress_lz4(_input: &[u8], _decompressed_size: usize) -> Result<Vec<u8>, A
     ))
 }
 
-#[cfg(feature = "zstd")]
+#[cfg(all(
+    feature = "zstd",
+    not(all(target_arch = "wasm32", target_os = "unknown"))
+))]
 fn compress_zstd(
     input: &[u8],
     output: &mut Vec<u8>,
@@ -297,7 +324,22 @@ fn compress_zstd(
     ))
 }
 
-#[cfg(feature = "zstd")]
+#[cfg(all(feature = "zstd", target_arch = "wasm32", target_os = "unknown"))]
+#[allow(clippy::ptr_arg)]
+fn compress_zstd(
+    _input: &[u8],
+    _output: &mut Vec<u8>,
+    _context: &mut CompressionContext,
+) -> Result<(), ArrowError> {
+    Err(ArrowError::InvalidArgumentError(
+        "cannot create Arrow IPC zstd compressor: feature \"zstd\" is enabled, but no backend is available for target wasm32-unknown-unknown".to_string(),
+    ))
+}
+
+#[cfg(all(
+    feature = "zstd",
+    not(all(target_arch = "wasm32", target_os = "unknown"))
+))]
 fn decompress_zstd(
     input: &[u8],
     decompressed_size: usize,
@@ -318,6 +360,18 @@ fn decompress_zstd(
 ) -> Result<Vec<u8>, ArrowError> {
     Err(ArrowError::InvalidArgumentError(
         "zstd IPC decompression requires the zstd feature".to_string(),
+    ))
+}
+
+#[cfg(all(feature = "zstd", target_arch = "wasm32", target_os = "unknown"))]
+#[allow(clippy::ptr_arg)]
+fn decompress_zstd(
+    _input: &[u8],
+    _decompressed_size: usize,
+    _context: &mut DecompressionContext,
+) -> Result<Vec<u8>, ArrowError> {
+    Err(ArrowError::InvalidArgumentError(
+        "cannot create Arrow IPC zstd decompressor: feature \"zstd\" is enabled, but no backend is available for target wasm32-unknown-unknown".to_string(),
     ))
 }
 

@@ -1440,15 +1440,12 @@ impl<W: Write> StreamWriter<W> {
             ));
         }
 
-        let (encoded_dictionaries, encoded_message) = self
-            .data_gen
-            .encode(
-                batch,
-                &mut self.dictionary_tracker,
-                &self.write_options,
-                &mut self.compression_context,
-            )
-            .expect("StreamWriter is configured to not error on dictionary replacement");
+        let (encoded_dictionaries, encoded_message) = self.data_gen.encode(
+            batch,
+            &mut self.dictionary_tracker,
+            &self.write_options,
+            &mut self.compression_context,
+        )?;
 
         for encoded_dictionary in encoded_dictionaries {
             write_message(&mut self.writer, encoded_dictionary, &self.write_options)?;
