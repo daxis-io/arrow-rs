@@ -40,6 +40,16 @@ case "$profile" in
       --locked \
       >"$tree_output"
     ;;
+  arrow-ipc)
+    cargo tree \
+      -p arrow-ipc \
+      --target wasm32-unknown-unknown \
+      --no-default-features \
+      --features lz4,zstd \
+      --edges normal,build \
+      --locked \
+      >"$tree_output"
+    ;;
   *)
     echo "unknown WASM dependency policy profile: $profile" >&2
     exit 2
