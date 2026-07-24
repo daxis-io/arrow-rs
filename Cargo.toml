@@ -112,7 +112,7 @@ criterion = { version = "0.8.0", default-features = false }
 
 insta = { version = "1.46.3", default-features = false }
 
-object_store = { git = "https://github.com/daxis-io/arrow-rs-object-store", rev = "b834fd0b69182f7c60c9656a758ad938dbbe9ef1", default-features = false }
+object_store = { git = "https://github.com/daxis-io/arrow-rs-object-store", rev = "7c30f6973689b8d1af3ef0e1548490c61a5ac5c7", default-features = false }
 
 simdutf8 = { version = "0.1.5", default-features = false }
 
