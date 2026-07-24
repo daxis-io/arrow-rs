@@ -211,7 +211,10 @@ impl IpcWriteOptions {
         ))
     }
 
-    #[cfg(feature = "zstd")]
+    #[cfg(all(
+        feature = "zstd",
+        not(all(target_arch = "wasm32", target_os = "unknown"))
+    ))]
     fn check_zstd_level(self, level: i32) -> Result<Self, ArrowError> {
         let range = zstd::compression_level_range();
         if !range.contains(&(level as zstd::zstd_safe::CompressionLevel)) {
@@ -224,6 +227,13 @@ impl IpcWriteOptions {
         }
 
         Ok(self)
+    }
+
+    #[cfg(all(feature = "zstd", target_arch = "wasm32", target_os = "unknown"))]
+    fn check_zstd_level(self, _level: i32) -> Result<Self, ArrowError> {
+        Err(ArrowError::InvalidArgumentError(
+            "cannot validate an Arrow IPC zstd compression level: feature \"zstd\" is enabled, but no backend is available for target wasm32-unknown-unknown".to_string(),
+        ))
     }
 
     /// Try to create IpcWriteOptions, checking for incompatible settings
