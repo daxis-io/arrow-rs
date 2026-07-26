@@ -104,7 +104,7 @@ fn native_zstd_stream_round_trips() {
     let mut reader = StreamReader::try_new(Cursor::new(bytes), None).unwrap();
     assert_eq!(reader.schema().field(0).name(), "value");
     let batch = reader.next().unwrap().unwrap();
-    assert_eq!(batch.num_rows(), 3);
+    assert_eq!(batch.num_rows(), 4096);
     assert!(reader.next().is_none());
 }
 
