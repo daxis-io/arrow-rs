@@ -171,8 +171,10 @@ jobs:
       - name: Install compiler for the existing WASI default build
         run: |
           apt-get update
-          apt-get install --yes --no-install-recommends clang
+          apt-get install --yes --no-install-recommends clang wasi-libc
       - name: Build wasm32-wasip1
+        env:
+          WASI_SYSROOT: /usr
         run: cargo build -p parquet --target wasm32-wasip1 --locked
 
   pyspark-integration-test:
