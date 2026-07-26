@@ -51,7 +51,10 @@ mod tests {
         );
 
         let error = page_decode_error(&reader);
-        assert!(error.contains("cannot create Parquet zstd codec"), "{error}");
+        assert!(
+            error.contains("cannot create Parquet zstd codec"),
+            "{error}"
+        );
         assert!(error.contains("feature \"zstd\" is enabled"), "{error}");
         assert!(error.contains("no backend is available"), "{error}");
         assert!(error.contains("wasm32-unknown-unknown"), "{error}");
