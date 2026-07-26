@@ -168,6 +168,10 @@ jobs:
             --manifest-path parquet/tests/wasm-codec-consumer/Cargo.toml \
             --target wasm32-unknown-unknown \
             --locked
+      - name: Install compiler for the existing WASI default build
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends clang
       - name: Build wasm32-wasip1
         run: cargo build -p parquet --target wasm32-wasip1 --locked
 
