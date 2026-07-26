@@ -207,6 +207,8 @@ jobs:
         env:
           CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner
         run: |
+          cargo generate-lockfile \
+            --manifest-path arrow-ipc/tests/wasm-codec-consumer/Cargo.toml
           cargo test \
             --manifest-path arrow-ipc/tests/wasm-codec-consumer/Cargo.toml \
             --target wasm32-unknown-unknown \
