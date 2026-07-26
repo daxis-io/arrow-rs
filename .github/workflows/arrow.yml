@@ -194,6 +194,10 @@ jobs:
         run: cargo generate-lockfile
       - name: Install wasm-bindgen test runner
         run: cargo install --locked wasm-bindgen-cli --version 0.2.114
+      - name: Install Node.js for wasm-bindgen-test-runner
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: "20"
       - name: Build wasm32-unknown-unknown
         run: |
           cargo build -p arrow --no-default-features --features=json,csv,ipc,ffi --target wasm32-unknown-unknown --locked
