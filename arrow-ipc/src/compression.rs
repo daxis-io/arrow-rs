@@ -376,10 +376,9 @@ fn compress_zstd(
 }
 
 #[cfg(all(feature = "zstd", target_arch = "wasm32", target_os = "unknown"))]
-#[allow(clippy::ptr_arg)]
 fn compress_zstd(
     _input: &[u8],
-    _output: &mut Vec<u8>,
+    _output: &mut [u8],
     _context: &mut IpcWriteContext,
     _level: i32,
 ) -> Result<(), ArrowError> {
@@ -416,7 +415,6 @@ fn decompress_zstd(
 }
 
 #[cfg(all(feature = "zstd", target_arch = "wasm32", target_os = "unknown"))]
-#[allow(clippy::ptr_arg)]
 fn decompress_zstd(
     _input: &[u8],
     _decompressed_size: usize,
