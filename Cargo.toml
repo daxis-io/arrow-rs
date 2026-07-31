@@ -112,7 +112,7 @@ criterion = { version = "0.8.0", default-features = false }
 
 insta = { version = "1.46.3", default-features = false }
 
-object_store = { version = "0.13.2", default-features = false }
+object_store = { version = "0.14.1", default-features = false }
 
 simdutf8 = { version = "0.1.5", default-features = false }
 
@@ -122,3 +122,8 @@ simdutf8 = { version = "0.1.5", default-features = false }
 inherits = "release"
 debug = true
 strip = false
+
+# Daxis-only stack integration pin. The Parquet candidate branch remains on
+# Apache main's canonical object_store declaration.
+[patch.crates-io]
+object_store = { git = "https://github.com/daxis-io/arrow-rs-object-store", rev = "d0066c218eaf3336bc6b5e5ca3141fe78e4fea8d" }
